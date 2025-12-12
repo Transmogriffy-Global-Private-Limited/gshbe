@@ -1,11 +1,11 @@
 # app/auth/logic/tokens.py
+import os
 from datetime import datetime, timedelta, timezone
 from jose import jwt
 
-# Put these in env later:
-JWT_SECRET = "CHANGE_ME"
-JWT_ALG = "HS256"
-JWT_EXPIRES_MIN = 60 * 24  # 24h
+JWT_SECRET = os.getenv("JWT_SECRET")
+JWT_ALG = os.getenv("JWT_ALG", "HS256")
+JWT_EXPIRES_MIN = int(os.getenv("JWT_EXPIRES_MIN", "1440"))
 
 def create_access_token(*, sub: str) -> str:
     now = datetime.now(timezone.utc)

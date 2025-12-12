@@ -1,11 +1,7 @@
 # db/piccolo_conf.py
 import os
-from dotenv import load_dotenv
 from piccolo.conf.apps import AppRegistry
 from piccolo.engine.postgres import PostgresEngine
-
-# Load .env from project root
-load_dotenv()
 
 DB = PostgresEngine(
     config={
