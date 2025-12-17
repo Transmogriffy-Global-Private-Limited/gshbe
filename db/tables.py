@@ -75,7 +75,7 @@ class Registration(Table):
     Role + capacity (personal / institutional) for an account.
     """
     id = UUID(primary_key=True, default=uuid.uuid4)
-    account = ForeignKey(references=Account)
+    account = ForeignKey(references=Account, unique = True)
     role = Varchar(length=16, choices=ROLE_CHOICES)
     capacity = Varchar(length=16, choices=CAPACITY_CHOICES)
     created_at = Timestamptz()

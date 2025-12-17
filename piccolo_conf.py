@@ -2,6 +2,9 @@
 import os
 from piccolo.conf.apps import AppRegistry
 from piccolo.engine.postgres import PostgresEngine
+from dotenv import load_dotenv
+
+load_dotenv()
 
 DB = PostgresEngine(
     config={
