@@ -1,18 +1,23 @@
-# app/auth/logic/auth_service.py
-from piccolo.apps.user.tables import BaseUser  # ignore if not used
 from fastapi import HTTPException, status
+from asyncpg.exceptions import UniqueViolationError
 
 from db.tables import Account, Registration
 from auth.logic.passwords import hash_password, verify_password
 from auth.logic.tokens import create_access_token
 
+
 async def signup(*, phone: str, password: str, role: str, capacity: str) -> dict:
-    existing = await Account.objects().get(Account.phone == phone)
+    # Optional fast-path check (keeps error message clean)
+    existing = await Account.objects().where(Account.phone == phone).first()
     if existing:
         raise HTTPException(status_code=409, detail="Phone already registered")
 
-    account = Account(phone=phone, password_hash=hash_password(password), is_active=True)
-    await account.save()
+    try:
+        account = Account(phone=phone, password_hash=hash_password(password), is_active=True)
+        await account.save()
+    except UniqueViolationError:
+        # DB is the final arbiter (handles race conditions)
+        raise HTTPException(status_code=409, detail="Phone already registered")
 
     reg = Registration(account=account.id, role=role, capacity=capacity)
     await reg.save()
@@ -20,8 +25,9 @@ async def signup(*, phone: str, password: str, role: str, capacity: str) -> dict
     token = create_access_token(sub=str(account.id))
     return {"account": account, "access_token": token}
 
+
 async def signin(*, phone: str, password: str) -> str:
-    account = await Account.objects().get(Account.phone == phone)
+    account = await Account.objects().where(Account.phone == phone).first()
     if not account:
         raise HTTPException(status_code=401, detail="Invalid phone or password")
 
@@ -33,12 +39,13 @@ async def signin(*, phone: str, password: str) -> str:
 
     return create_access_token(sub=str(account.id))
 
+
 async def get_me(*, account_id: str) -> dict:
-    account = await Account.objects().get(Account.id == account_id)
+    account = await Account.objects().where(Account.id == account_id).first()
     if not account:
         raise HTTPException(status_code=401, detail="Account not found")
 
-    reg = await Registration.objects().get(Registration.account == account_id)
+    reg = await Registration.objects().where(Registration.account == account_id).first()
     if not reg:
         raise HTTPException(status_code=404, detail="Registration not found")
 
