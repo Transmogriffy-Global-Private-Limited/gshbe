@@ -19,7 +19,8 @@ async def signup(*, phone: str, password: str, role: str, capacity: str) -> dict
         # DB is the final arbiter (handles race conditions)
         raise HTTPException(status_code=409, detail="Phone already registered")
 
-    reg = Registration(account=account.id, role=role, capacity=capacity)
+    if role!= "admin":
+        reg = Registration(account=account.id, role=role, capacity=capacity)
     await reg.save()
 
     token = create_access_token(sub=str(account.id))

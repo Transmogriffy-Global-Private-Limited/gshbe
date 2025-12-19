@@ -20,11 +20,12 @@ ROLE_CHOICES = [
     Choice("seeker", "seeker"),
     Choice("helper", "helper"),
     Choice("both", "both"),
+    Choice("admin", "admin")
 ]
 
 CAPACITY_CHOICES = [
     Choice("personal", "personal"),
-    Choice("institutional", "institutional"),
+    Choice("institutional", "institutional")
 ]
 
 JOB_TYPE_CHOICES = [
