@@ -21,7 +21,7 @@ async def signup(*, phone: str, password: str, role: str, capacity: str) -> dict
 
     if role!= "admin":
         reg = Registration(account=account.id, role=role, capacity=capacity)
-    await reg.save()
+        await reg.save()
 
     token = create_access_token(sub=str(account.id))
     return {"account": account, "access_token": token}
