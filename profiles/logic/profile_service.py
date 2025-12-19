@@ -1,0 +1,124 @@
+# profiles/logic/profile_service.py
+from __future__ import annotations
+
+from fastapi import HTTPException, status
+
+from db.tables import (
+    Registration,
+    SeekerPersonal,
+    SeekerInstitutional,
+    HelperPersonal,
+    HelperInstitutional,
+)
+
+from profiles.structs.dtos import ProfileOut, ProfileUpsertIn
+
+
+_KIND_META = {
+    "seeker_personal": {"side": "seeker", "capacity": "personal", "table": SeekerPersonal},
+    "seeker_institutional": {"side": "seeker", "capacity": "institutional", "table": SeekerInstitutional},
+    "helper_personal": {"side": "helper", "capacity": "personal", "table": HelperPersonal},
+    "helper_institutional": {"side": "helper", "capacity": "institutional", "table": HelperInstitutional},
+}
+
+
+async def _get_registration_by_account_id(account_id: str) -> Registration:
+    # Prefer .first() to avoid .get() throwing on "not found"
+    reg = await Registration.objects().where(Registration.account == account_id).first()
+    if not reg:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Registration not found for this account",
+        )
+    return reg
+
+
+def _validate_payload_against_registration(*, reg: Registration, kind: str) -> None:
+    meta = _KIND_META.get(kind)
+    if not meta:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Unknown profile kind: {kind}",
+        )
+
+    # Capacity must match always
+    if reg.capacity != meta["capacity"]:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Capacity mismatch: you are '{reg.capacity}', but payload is '{meta['capacity']}'",
+        )
+
+    # Role rules:
+    # - seeker can only submit seeker_*
+    # - helper can only submit helper_*
+    # - both can submit either
+    if reg.role != "both" and reg.role != meta["side"]:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Role mismatch: you are '{reg.role}', but payload is for '{meta['side']}'",
+        )
+
+
+async def get_my_profile(*, account_id: str) -> ProfileOut:
+    reg = await _get_registration_by_account_id(account_id)
+
+    # Decide default kind for GET:
+    # - if role is seeker => seeker_{capacity}
+    # - if role is helper => helper_{capacity}
+    # - if role is both   => seeker_{capacity} (default)
+    side = reg.role if reg.role in ("seeker", "helper") else "seeker"
+    kind = f"{side}_{reg.capacity}"
+
+    meta = _KIND_META.get(kind)
+    if not meta:
+        # Should never happen unless role/capacity got new values
+        return ProfileOut(
+            registration_id=str(reg.id),
+            role=reg.role,
+            capacity=reg.capacity,
+            profile_kind=None,
+            profile={},
+        )
+
+    table = meta["table"]
+    row = await table.objects().where(table.registration == reg.id).first()
+
+    return ProfileOut(
+        registration_id=str(reg.id),
+        role=reg.role,
+        capacity=reg.capacity,
+        profile_kind=kind if row else None,
+        profile=row.to_dict() if row else {},
+    )
+
+
+async def upsert_my_profile(*, account_id: str, payload: ProfileUpsertIn) -> ProfileOut:
+    reg = await _get_registration_by_account_id(account_id)
+
+    kind = payload.kind
+    _validate_payload_against_registration(reg=reg, kind=kind)
+
+    meta = _KIND_META[kind]
+    table = meta["table"]
+
+    # Upsert on (registration) which is unique for these profile tables
+    existing = await table.objects().where(table.registration == reg.id).first()
+
+    data = payload.model_dump(exclude={"kind"}, exclude_unset=True)
+
+    if existing:
+        for k, v in data.items():
+            setattr(existing, k, v)
+        await existing.save()
+        row = existing
+    else:
+        row = table(registration=reg.id, **data)
+        await row.save()
+
+    return ProfileOut(
+        registration_id=str(reg.id),
+        role=reg.role,
+        capacity=reg.capacity,
+        profile_kind=kind,
+        profile=row.to_dict(),
+    )
