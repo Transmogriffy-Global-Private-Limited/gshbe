@@ -35,18 +35,26 @@ async def signup(*, phone: str, password: str, role: str, capacity: str) -> dict
     return {"account": account, "access_token": token, "kind": kind}
 
 
-async def signin(*, phone: str, password: str) -> str:
+async def signin(*, phone: str, password: str) -> dict:
     account = await Account.objects().where(Account.phone == phone).first()
-    if not account:
-        raise HTTPException(status_code=401, detail="Invalid phone or password")
+    if not account or not verify_password(password, account.password_hash):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    if not account.is_active:
-        raise HTTPException(status_code=403, detail="Account disabled")
+    reg = await Registration.objects().where(Registration.account == account.id).first()
 
-    if not verify_password(password, account.password_hash):
-        raise HTTPException(status_code=401, detail="Invalid phone or password")
+    user_type = None
+    if reg:
+        if reg.role in ("seeker", "helper"):
+            user_type = reg.role
+        elif reg.role == "both":
+            user_type = "seeker"  # default side
+        # admin → None
 
-    return create_access_token(sub=str(account.id))
+    token = create_access_token(sub=str(account.id))
+    return {
+        "access_token": token,
+        "type": user_type,
+    }
 
 
 async def get_me(*, account_id: str) -> dict:

@@ -14,11 +14,18 @@ class SignInIn(BaseModel):
 class TokenOut(BaseModel):
     access_token: str = Field(..., description="JWT access token")
     token_type: str = Field("bearer")
-
+    
 class SignUpOut(TokenOut):
     kind: str | None = Field(
         None,
         description="Default profile kind for this account (e.g. seeker_personal). None for admin."
+    )
+
+class SignInOut(TokenOut):
+    type: str | None = Field(
+        None,
+        description="Active user side after signin: seeker or helper. None for admin.",
+        examples=["seeker"],
     )
 
 class AccountOut(BaseModel):

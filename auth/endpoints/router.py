@@ -1,6 +1,6 @@
 # app/auth/endpoints/router.py
 from fastapi import APIRouter, status, Depends
-from auth.structs.dtos import SignUpIn, SignInIn, TokenOut, AccountOut, SignUpOut
+from auth.structs.dtos import SignUpIn, SignInIn, SignInOut, SignUpOut
 from auth.logic.auth_service import signup, signin
 from auth.structs.dtos import MeOut
 from auth.logic.deps import get_current_account_id
@@ -35,7 +35,7 @@ async def signup_endpoint(payload: SignUpIn):
     "/signin",
     summary="Sign in with phone + password",
     description="Verifies password and returns a JWT access token.",
-    response_model=TokenOut,
+    response_model=SignInOut,
     responses={
         200: {"description": "OK"},
         401: {"description": "Invalid phone or password"},
