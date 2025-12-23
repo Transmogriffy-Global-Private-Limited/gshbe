@@ -1,4 +1,3 @@
-# app/auth/structs/dtos.py
 from pydantic import BaseModel, Field
 from auth.structs.enums import Role, Capacity
 
@@ -15,6 +14,12 @@ class SignInIn(BaseModel):
 class TokenOut(BaseModel):
     access_token: str = Field(..., description="JWT access token")
     token_type: str = Field("bearer")
+
+class SignUpOut(TokenOut):
+    kind: str | None = Field(
+        None,
+        description="Default profile kind for this account (e.g. seeker_personal). None for admin."
+    )
 
 class AccountOut(BaseModel):
     id: str

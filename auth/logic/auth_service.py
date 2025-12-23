@@ -16,15 +16,23 @@ async def signup(*, phone: str, password: str, role: str, capacity: str) -> dict
         account = Account(phone=phone, password_hash=hash_password(password), is_active=True)
         await account.save()
     except UniqueViolationError:
-        # DB is the final arbiter (handles race conditions)
         raise HTTPException(status_code=409, detail="Phone already registered")
 
-    if role!= "admin":
+    kind = None
+
+    if role != "admin":
         reg = Registration(account=account.id, role=role, capacity=capacity)
         await reg.save()
 
+        # Mirror profiles.get_my_profile default logic:
+        # - seeker -> seeker_{capacity}
+        # - helper -> helper_{capacity}
+        # - both   -> seeker_{capacity} (default)
+        side = role if role in ("seeker", "helper") else "seeker"
+        kind = f"{side}_{capacity}"
+
     token = create_access_token(sub=str(account.id))
-    return {"account": account, "access_token": token}
+    return {"account": account, "access_token": token, "kind": kind}
 
 
 async def signin(*, phone: str, password: str) -> str:

@@ -1,6 +1,6 @@
 # app/auth/endpoints/router.py
 from fastapi import APIRouter, status, Depends
-from auth.structs.dtos import SignUpIn, SignInIn, TokenOut, AccountOut
+from auth.structs.dtos import SignUpIn, SignInIn, TokenOut, AccountOut, SignUpOut
 from auth.logic.auth_service import signup, signin
 from auth.structs.dtos import MeOut
 from auth.logic.deps import get_current_account_id
@@ -11,7 +11,7 @@ router = APIRouter()
     "/signup",
     summary="Sign up with phone + password",
     description="Creates Account + Registration. Returns a JWT access token.",
-    response_model=TokenOut,
+    response_model=SignUpOut,
     status_code=status.HTTP_201_CREATED,
     responses={
         201: {"description": "Created"},
@@ -25,7 +25,11 @@ async def signup_endpoint(payload: SignUpIn):
         role=payload.role.value,
         capacity=payload.capacity.value,
     )
-    return {"access_token": result["access_token"], "token_type": "bearer"}
+    return {
+        "access_token": result["access_token"],
+        "token_type": "bearer",
+        "kind": result["kind"],
+    }
 
 @router.post(
     "/signin",
