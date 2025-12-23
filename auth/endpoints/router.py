@@ -44,7 +44,11 @@ async def signup_endpoint(payload: SignUpIn):
 )
 async def signin_endpoint(payload: SignInIn):
     token = await signin(phone=payload.phone, password=payload.password)
-    return {"access_token": token, "token_type": "bearer"}
+    return {
+        "access_token": token["access_token"],
+        "token_type": "bearer",
+        "type": token.get("type"),
+    }
 
 @router.get(
     "/me",
