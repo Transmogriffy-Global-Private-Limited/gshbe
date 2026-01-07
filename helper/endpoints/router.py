@@ -388,3 +388,8 @@ async def del_experience_me(
     account_id: str = Depends(get_current_account_id),
 ):
     return await delete_my_experience(account_id=account_id, experience_id=experience_id)
+
+from helper.endpoints.list_helpers import router as list_helpers_router
+
+router.include_router(list_helpers_router)
+
