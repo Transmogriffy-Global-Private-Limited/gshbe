@@ -393,3 +393,8 @@ from helper.endpoints.list_helpers import router as list_helpers_router
 
 router.include_router(list_helpers_router)
 
+from fastapi import APIRouter
+from helper.endpoints.list_helpers import router as list_helpers_router
+
+router = APIRouter()
+router.include_router(list_helpers_router)

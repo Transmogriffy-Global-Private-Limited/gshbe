@@ -39,3 +39,6 @@ app.add_middleware(
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(profiles_router, prefix="/profiles", tags=["profiles"])
 app.include_router(helper_router, prefix="/helper", tags=["helper"])
+from helper.endpoints.router import router as helper_router
+
+app.include_router(helper_router)

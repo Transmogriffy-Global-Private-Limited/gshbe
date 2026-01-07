@@ -1,55 +1,88 @@
-from fastapi import HTTPException, status
-from db.tables import Registration, HelperProfile
+from db.tables import (
+    Registration,
+    HelperPersonal,
+    HelperInstitutional,
+)
+from piccolo.query import Select
 
 
-async def _ensure_logged_in(account_id: str) -> None:
-    reg = await Registration.objects().where(
-        Registration.account == account_id
-    ).first()
+async def list_helpers():
+    helpers = []
 
-    if not reg:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid account",
+    # -------------------------
+    # PERSONAL HELPERS
+    # -------------------------
+    personal_rows = (
+        await HelperPersonal
+        .select(
+            HelperPersonal.registration,
+            HelperPersonal.name,
+            HelperPersonal.age,
+            HelperPersonal.faith,
+            HelperPersonal.languages,
+            HelperPersonal.city,
+            HelperPersonal.area,
+            HelperPersonal.phone,
+            HelperPersonal.years_of_experience,
+            HelperPersonal.avg_rating,
+            HelperPersonal.rating_count,
         )
+        .join(Registration)
+        .where(
+            Registration.role == "helper",
+            Registration.capacity == "personal",
+            Registration.is_online == True,
+        )
+    )
 
+    for row in personal_rows:
+        helpers.append({
+            "registration_id": str(row["registration"]),
+            "type": "personal",
+            "name": row["name"],
+            "age": row["age"],
+            "faith": row["faith"],
+            "languages": row["languages"],
+            "city": row["city"],
+            "area": row["area"],
+            "phone": row["phone"],
+            "years_of_experience": row["years_of_experience"],
+            "avg_rating": row["avg_rating"],
+            "rating_count": row["rating_count"],
+        })
 
-async def list_helpers(
-    *,
-    account_id: str,
-    city: str | None,
-    area: str | None,
-    min_rating: float | None,
-) -> list[dict]:
+    # -------------------------
+    # INSTITUTIONAL HELPERS
+    # -------------------------
+    institutional_rows = (
+        await HelperInstitutional
+        .select(
+            HelperInstitutional.registration,
+            HelperInstitutional.name,
+            HelperInstitutional.city,
+            HelperInstitutional.address,
+            HelperInstitutional.phone,
+            HelperInstitutional.avg_rating,
+            HelperInstitutional.rating_count,
+        )
+        .join(Registration)
+        .where(
+            Registration.role == "helper",
+            Registration.capacity == "institutional",
+            Registration.is_online == True,
+        )
+    )
 
-    await _ensure_logged_in(account_id)
+    for row in institutional_rows:
+        helpers.append({
+            "registration_id": str(row["registration"]),
+            "type": "institutional",
+            "name": row["name"],
+            "city": row["city"],
+            "address": row["address"],
+            "phone": row["phone"],
+            "avg_rating": row["avg_rating"],
+            "rating_count": row["rating_count"],
+        })
 
-    query = HelperProfile.objects()
-
-    if city:
-        query = query.where(HelperProfile.city == city)
-
-    if area:
-        query = query.where(HelperProfile.area == area)
-
-    if min_rating is not None:
-        query = query.where(HelperProfile.avg_rating >= min_rating)
-
-    rows = await query
-
-    return [
-        {
-            "registration_id": str(r.registration),
-            "name": r.name,
-            "age": r.age,
-            "faith": r.faith,
-            "languages": r.languages,
-            "city": r.city,
-            "area": r.area,
-            "phone": r.phone,
-            "years_of_experience": r.years_of_experience,
-            "avg_rating": float(r.avg_rating) if r.avg_rating is not None else None,
-            "rating_count": r.rating_count,
-        }
-        for r in rows
-    ]
+    return helpers
