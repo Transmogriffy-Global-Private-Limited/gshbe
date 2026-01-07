@@ -1,4 +1,5 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Depends, Query, status
+from auth.logic.deps import get_current_account_id
 from helper.logic.list_helpers import list_helpers
 from helper.structs.list_helpers import HelperListOut
 
@@ -10,14 +11,17 @@ router = APIRouter()
     response_model=list[HelperListOut],
     status_code=status.HTTP_200_OK,
     summary="List all helpers",
-    description=(
-        "Public endpoint.\n\n"
-        "Returns all registered helpers with active accounts.\n\n"
-        "Notes:\n"
-        "- role = helper or both\n"
-        "- This does NOT mean currently online\n"
-        "- JWT is NOT required\n"
-    ),
+    description="Returns list of registered helpers with profile details",
 )
-async def get_helpers():
-    return await list_helpers()
+async def get_helpers(
+    city: str | None = Query(default=None),
+    area: str | None = Query(default=None),
+    min_rating: float | None = Query(default=None),
+    account_id: str = Depends(get_current_account_id),
+):
+    return await list_helpers(
+        account_id=account_id,
+        city=city,
+        area=area,
+        min_rating=min_rating,
+    )

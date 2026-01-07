@@ -1,57 +1,55 @@
-from db.tables import (
-    Account,
-    Registration,
-    HelperPreference,
-    HelperPreferredService,
-    HelperExperience,
-)
+from fastapi import HTTPException, status
+from db.tables import Registration, HelperProfile
 
 
-async def list_helpers() -> list[dict]:
-    """
-    Returns all active helpers (role = helper | both).
-    """
+async def _ensure_logged_in(account_id: str) -> None:
+    reg = await Registration.objects().where(
+        Registration.account == account_id
+    ).first()
 
-    regs = await Registration.objects().where(
-        Registration.role.is_in(["helper", "both"])
-    )
-
-    results: list[dict] = []
-
-    for reg in regs:
-        account = await Account.objects().where(
-            Account.id == reg.account,
-            Account.is_active == True,
-        ).first()
-
-        if not account:
-            continue
-
-        pref = await HelperPreference.objects().where(
-            HelperPreference.registration == reg.id
-        ).first()
-
-        services = await HelperPreferredService.select(
-            HelperPreferredService.service
-        ).where(
-            HelperPreferredService.registration == reg.id
+    if not reg:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid account",
         )
 
-        # ✅ COUNT EXPERIENCE (THIS IS NEW)
-        experience_count = await HelperExperience.count().where(
-            HelperExperience.registration == reg.id
-        )
 
-        results.append({
-            "registration_id": str(reg.id),
-            "account_id": str(reg.account),
-            "city": pref.city if pref else None,
-            "area": pref.area if pref else None,
-            "job_type": pref.job_type if pref else None,
-            "preferred_service_ids": [str(s["service"]) for s in services],
+async def list_helpers(
+    *,
+    account_id: str,
+    city: str | None,
+    area: str | None,
+    min_rating: float | None,
+) -> list[dict]:
 
-            # ✅ ADDED FIELD
-            "experience_count": experience_count,
-        })
+    await _ensure_logged_in(account_id)
 
-    return results
+    query = HelperProfile.objects()
+
+    if city:
+        query = query.where(HelperProfile.city == city)
+
+    if area:
+        query = query.where(HelperProfile.area == area)
+
+    if min_rating is not None:
+        query = query.where(HelperProfile.avg_rating >= min_rating)
+
+    rows = await query
+
+    return [
+        {
+            "registration_id": str(r.registration),
+            "name": r.name,
+            "age": r.age,
+            "faith": r.faith,
+            "languages": r.languages,
+            "city": r.city,
+            "area": r.area,
+            "phone": r.phone,
+            "years_of_experience": r.years_of_experience,
+            "avg_rating": float(r.avg_rating) if r.avg_rating is not None else None,
+            "rating_count": r.rating_count,
+        }
+        for r in rows
+    ]

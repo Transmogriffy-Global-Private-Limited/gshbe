@@ -1,16 +1,16 @@
-from typing import Optional, List
 from pydantic import BaseModel
+from typing import Optional
 
 
 class HelperListOut(BaseModel):
     registration_id: str
-    account_id: str
-
-    city: Optional[str] = None
-    area: Optional[str] = None
-    job_type: Optional[str] = None
-
-    preferred_service_ids: List[str] = []
-
-    # experience numbers (COUNT)
-    experience_count: int
+    name: str
+    age: Optional[int]
+    faith: Optional[str]
+    languages: Optional[str]
+    city: str
+    area: str
+    phone: Optional[str]
+    years_of_experience: Optional[int]
+    avg_rating: Optional[float]
+    rating_count: int
