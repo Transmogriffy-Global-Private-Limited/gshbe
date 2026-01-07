@@ -1,9 +1,9 @@
-from fastapi import HTTPException, status
 from db.tables import (
     Account,
     Registration,
     HelperPreference,
     HelperPreferredService,
+    HelperExperience,
 )
 
 
@@ -31,9 +31,16 @@ async def list_helpers() -> list[dict]:
             HelperPreference.registration == reg.id
         ).first()
 
-        services = await HelperPreferredService.objects().where(
+        services = await HelperPreferredService.select(
+            HelperPreferredService.service
+        ).where(
             HelperPreferredService.registration == reg.id
-        ).columns(HelperPreferredService.service)
+        )
+
+        # ✅ COUNT EXPERIENCE (THIS IS NEW)
+        experience_count = await HelperExperience.count().where(
+            HelperExperience.registration == reg.id
+        )
 
         results.append({
             "registration_id": str(reg.id),
@@ -42,6 +49,9 @@ async def list_helpers() -> list[dict]:
             "area": pref.area if pref else None,
             "job_type": pref.job_type if pref else None,
             "preferred_service_ids": [str(s["service"]) for s in services],
+
+            # ✅ ADDED FIELD
+            "experience_count": experience_count,
         })
 
     return results
