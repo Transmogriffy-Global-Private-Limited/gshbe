@@ -1,3 +1,9 @@
+from db.tables import (
+    HelperPersonal,
+    HelperInstitutional,
+)
+
+
 async def list_helpers():
     helpers = []
 
@@ -22,11 +28,8 @@ async def list_helpers():
     )
 
     print("✅ Personal rows:", personal_rows)
-    print("🔢 Personal count:", len(personal_rows))
 
     for row in personal_rows:
-        print("➡️ Personal helper row:", row)
-
         helpers.append({
             "registration_id": row["registration"],
             "type": "personal",
@@ -42,6 +45,32 @@ async def list_helpers():
             "rating_count": row["rating_count"],
         })
 
-    print("📦 Helpers after personal:", helpers)
+    institutional_rows = await HelperInstitutional.select(
+        HelperInstitutional.registration,
+        HelperInstitutional.name,
+        HelperInstitutional.city,
+        HelperInstitutional.address,
+        HelperInstitutional.phone,
+        HelperInstitutional.avg_rating,
+        HelperInstitutional.rating_count,
+    ).where(
+        HelperInstitutional.registration.role == "helper",
+        HelperInstitutional.registration.capacity == "institutional",
+        HelperInstitutional.registration.is_online == True,
+    )
+
+    print("✅ Institutional rows:", institutional_rows)
+
+    for row in institutional_rows:
+        helpers.append({
+            "registration_id": row["registration"],
+            "type": "institutional",
+            "name": row["name"],
+            "city": row["city"],
+            "address": row["address"],
+            "phone": row["phone"],
+            "avg_rating": row["avg_rating"],
+            "rating_count": row["rating_count"],
+        })
 
     return helpers
