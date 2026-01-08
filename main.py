@@ -1,4 +1,5 @@
-# app/main.py
+# main.py
+
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,7 +27,7 @@ app = FastAPI(
     title="gshbe API",
     version="0.1.0",
     lifespan=lifespan,
-    docs_url="/swagger",   # ✅ Swagger available here
+    docs_url="/swagger",
 )
 
 app.add_middleware(
@@ -37,7 +38,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ✅ ROUTERS (ONLY ONCE)
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(profiles_router, prefix="/profiles", tags=["profiles"])
 app.include_router(helper_router, prefix="/helper", tags=["helper"])
