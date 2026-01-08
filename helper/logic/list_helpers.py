@@ -1,5 +1,6 @@
 from db.tables import HelperPersonal, HelperInstitutional, Registration
 
+
 async def list_helpers():
     helpers = []
 
@@ -18,9 +19,13 @@ async def list_helpers():
         HelperPersonal.avg_rating,
         HelperPersonal.rating_count,
     ).where(
-        Registration.role == "helper",
-        Registration.capacity == "personal",
-        Registration.is_online == True,
+        HelperPersonal.registration.is_in(
+            Registration.select(Registration.id).where(
+                Registration.role == "helper",
+                Registration.capacity == "personal",
+                Registration.is_online == True,
+            )
+        )
     )
 
     print("✅ Personal rows:", personal_rows)
@@ -52,9 +57,13 @@ async def list_helpers():
         HelperInstitutional.avg_rating,
         HelperInstitutional.rating_count,
     ).where(
-        Registration.role == "helper",
-        Registration.capacity == "institutional",
-        Registration.is_online == True,
+        HelperInstitutional.registration.is_in(
+            Registration.select(Registration.id).where(
+                Registration.role == "helper",
+                Registration.capacity == "institutional",
+                Registration.is_online == True,
+            )
+        )
     )
 
     print("✅ Institutional rows:", institutional_rows)
