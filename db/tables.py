@@ -83,7 +83,7 @@ class Registration(Table):
     is_online = Boolean(default=False)  # your 'presence'
 
 
-# ---------- Seeker details ----------
+
 
 # ---------- Helper details ----------
 
@@ -115,7 +115,7 @@ class HelperInstitutional(Table):
     avg_rating = Numeric(null=True)
     rating_count = Integer(default=0)
 
-
+# ---------- Seeker details ----------
 class SeekerPersonal(Table):
     """
     Personal seeker profile.

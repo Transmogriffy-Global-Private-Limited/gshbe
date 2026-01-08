@@ -19,7 +19,7 @@ async def list_helpers():
         HelperPersonal.registration,
         HelperPersonal.name,
         HelperPersonal.age,
-        HelperPersonal.faith,          # ✅ MUST BE HERE
+        HelperPersonal.faith,         
         HelperPersonal.languages,
         HelperPersonal.city,
         HelperPersonal.area,
@@ -40,7 +40,7 @@ async def list_helpers():
             "profile": {
                 "name": row["name"],
                 "age": row["age"],
-                "faith": row["faith"],          # ✅ MUST BE HERE
+                "faith": row["faith"],          
                 "languages": row["languages"],
                 "city": row["city"],
                 "area": row["area"],
