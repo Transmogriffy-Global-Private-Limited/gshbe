@@ -1,14 +1,12 @@
-# helper/logic/list_helpers.py
-
 from db.tables import Registration, HelperPersonal, HelperInstitutional
 
 
 async def list_helpers():
-    # -------------------------------
-    # PERSONAL HELPERS
-    # -------------------------------
-    print("👉 Fetching personal helpers...")
+    helpers = []
 
+    # ---------------------------------
+    # PERSONAL HELPERS
+    # ---------------------------------
     valid_regs = (
         Registration.select(Registration.id)
         .where(
@@ -21,6 +19,8 @@ async def list_helpers():
         HelperPersonal.registration,
         HelperPersonal.name,
         HelperPersonal.age,
+        HelperPersonal.faith,          # ✅ MUST BE HERE
+        HelperPersonal.languages,
         HelperPersonal.city,
         HelperPersonal.area,
         HelperPersonal.phone,
@@ -31,35 +31,24 @@ async def list_helpers():
         HelperPersonal.registration.is_in(valid_regs)
     )
 
-    print(f"✅ Personal rows: {personal_rows}")
+    for row in personal_rows:
+        helpers.append({
+            "registration_id": str(row["registration"]),
+            "role": "helper",
+            "capacity": "personal",
+            "profile_kind": "helper_personal",
+            "profile": {
+                "name": row["name"],
+                "age": row["age"],
+                "faith": row["faith"],          # ✅ MUST BE HERE
+                "languages": row["languages"],
+                "city": row["city"],
+                "area": row["area"],
+                "phone": row["phone"],
+                "years_of_experience": row["years_of_experience"],
+                "avg_rating": row["avg_rating"],
+                "rating_count": row["rating_count"],
+            }
+        })
 
-    # -------------------------------
-    # INSTITUTIONAL HELPERS
-    # -------------------------------
-    print("👉 Fetching institutional helpers...")
-
-    valid_regs_inst = (
-        Registration.select(Registration.id)
-        .where(
-            Registration.role == "helper",
-            Registration.capacity == "institutional",
-        )
-    )
-
-    institutional_rows = await HelperInstitutional.select(
-        HelperInstitutional.registration,
-        HelperInstitutional.name,
-        HelperInstitutional.city,
-        HelperInstitutional.phone,
-        HelperInstitutional.avg_rating,
-        HelperInstitutional.rating_count,
-    ).where(
-        HelperInstitutional.registration.is_in(valid_regs_inst)
-    )
-
-    print(f"✅ Institutional rows: {institutional_rows}")
-
-    return {
-        "personal": personal_rows,
-        "institutional": institutional_rows,
-    }
+    return helpers
