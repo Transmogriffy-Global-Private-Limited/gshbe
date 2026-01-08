@@ -1,4 +1,4 @@
-from db.tables import HelperPersonal, HelperInstitutional
+from db.tables import HelperPersonal, HelperInstitutional, Registration
 
 async def list_helpers():
     helpers = []
@@ -18,9 +18,9 @@ async def list_helpers():
         HelperPersonal.avg_rating,
         HelperPersonal.rating_count,
     ).where(
-        HelperPersonal.registration.role == "helper",
-        HelperPersonal.registration.capacity == "personal",
-        HelperPersonal.registration.is_online == True,
+        Registration.role == "helper",
+        Registration.capacity == "personal",
+        Registration.is_online == True,
     )
 
     print("✅ Personal rows:", personal_rows)
@@ -52,9 +52,9 @@ async def list_helpers():
         HelperInstitutional.avg_rating,
         HelperInstitutional.rating_count,
     ).where(
-        HelperInstitutional.registration.role == "helper",
-        HelperInstitutional.registration.capacity == "institutional",
-        HelperInstitutional.registration.is_online == True,
+        Registration.role == "helper",
+        Registration.capacity == "institutional",
+        Registration.is_online == True,
     )
 
     print("✅ Institutional rows:", institutional_rows)
