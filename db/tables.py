@@ -85,6 +85,37 @@ class Registration(Table):
 
 # ---------- Seeker details ----------
 
+# ---------- Helper details ----------
+
+class HelperPersonal(Table):
+    registration = ForeignKey(references=Registration, unique=True)
+
+    name = Varchar(length=100)
+    age = Integer(null=True)
+    faith = Varchar(length=50, null=True)
+    languages = Varchar(length=100, null=True)
+
+    city = Varchar(length=100)
+    area = Varchar(length=100)
+    phone = Varchar(length=20, null=True)
+
+    years_of_experience = Integer(null=True)
+    avg_rating = Numeric(null=True)
+    rating_count = Integer(default=0)
+
+
+class HelperInstitutional(Table):
+    registration = ForeignKey(references=Registration, unique=True)
+
+    name = Varchar(length=200)
+    city = Varchar(length=100)
+    address = Varchar(length=255)
+    phone = Varchar(length=20, null=True)
+
+    avg_rating = Numeric(null=True)
+    rating_count = Integer(default=0)
+
+
 class SeekerPersonal(Table):
     """
     Personal seeker profile.
@@ -113,35 +144,6 @@ class SeekerInstitutional(Table):
 
 
 # ---------- Helper details ----------
-
-class HelperPersonal(Table):
-    """
-    Personal helper profile.
-    """
-    registration = ForeignKey(references=Registration, unique=True)
-    name = Varchar(length=100)
-    age = Integer(null=True)
-    faith = Varchar(length=50, null=True)
-    languages = Varchar(length=255, null=True)  # comma-separated for now
-    city = Varchar(length=100)
-    area = Varchar(length=100)
-    phone = Varchar(length=20, null=True)
-    years_of_experience = Integer(null=True)
-    avg_rating = Numeric(null=True)
-    rating_count = Integer(default=0)
-
-
-class HelperInstitutional(Table):
-    """
-    Institutional helper (e.g. agency, hospital, etc).
-    """
-    registration = ForeignKey(references=Registration, unique=True)
-    name = Varchar(length=200)
-    city = Varchar(length=100)
-    address = Text()
-    phone = Varchar(length=20, null=True)
-    avg_rating = Numeric(null=True)
-    rating_count = Integer(default=0)
 
 
 # ---------- Services & skills ----------
