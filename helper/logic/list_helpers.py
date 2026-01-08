@@ -1,37 +1,42 @@
 from db.tables import (
     HelperPersonal,
     HelperInstitutional,
+    Registration,
 )
-
 
 async def list_helpers():
     helpers = []
 
     print("👉 Fetching personal helpers...")
 
-    personal_rows = await HelperPersonal.select(
-        HelperPersonal.registration,
-        HelperPersonal.name,
-        HelperPersonal.age,
-        HelperPersonal.faith,
-        HelperPersonal.languages,
-        HelperPersonal.city,
-        HelperPersonal.area,
-        HelperPersonal.phone,
-        HelperPersonal.years_of_experience,
-        HelperPersonal.avg_rating,
-        HelperPersonal.rating_count,
-    ).where(
-        HelperPersonal.registration.role == "helper",
-        HelperPersonal.registration.capacity == "personal",
-        HelperPersonal.registration.is_online == True,
+    personal_rows = (
+        await HelperPersonal
+        .select(
+            HelperPersonal.registration,
+            HelperPersonal.name,
+            HelperPersonal.age,
+            HelperPersonal.faith,
+            HelperPersonal.languages,
+            HelperPersonal.city,
+            HelperPersonal.area,
+            HelperPersonal.phone,
+            HelperPersonal.years_of_experience,
+            HelperPersonal.avg_rating,
+            HelperPersonal.rating_count,
+        )
+        .join(Registration)
+        .where(
+            Registration.role == "helper",
+            Registration.capacity == "personal",
+            Registration.is_online == True,
+        )
     )
 
     print("✅ Personal rows:", personal_rows)
 
     for row in personal_rows:
         helpers.append({
-            "registration_id": row["registration"],
+            "registration_id": str(row["registration"]),
             "type": "personal",
             "name": row["name"],
             "age": row["age"],
@@ -45,25 +50,32 @@ async def list_helpers():
             "rating_count": row["rating_count"],
         })
 
-    institutional_rows = await HelperInstitutional.select(
-        HelperInstitutional.registration,
-        HelperInstitutional.name,
-        HelperInstitutional.city,
-        HelperInstitutional.address,
-        HelperInstitutional.phone,
-        HelperInstitutional.avg_rating,
-        HelperInstitutional.rating_count,
-    ).where(
-        HelperInstitutional.registration.role == "helper",
-        HelperInstitutional.registration.capacity == "institutional",
-        HelperInstitutional.registration.is_online == True,
+    print("👉 Fetching institutional helpers...")
+
+    institutional_rows = (
+        await HelperInstitutional
+        .select(
+            HelperInstitutional.registration,
+            HelperInstitutional.name,
+            HelperInstitutional.city,
+            HelperInstitutional.address,
+            HelperInstitutional.phone,
+            HelperInstitutional.avg_rating,
+            HelperInstitutional.rating_count,
+        )
+        .join(Registration)
+        .where(
+            Registration.role == "helper",
+            Registration.capacity == "institutional",
+            Registration.is_online == True,
+        )
     )
 
     print("✅ Institutional rows:", institutional_rows)
 
     for row in institutional_rows:
         helpers.append({
-            "registration_id": row["registration"],
+            "registration_id": str(row["registration"]),
             "type": "institutional",
             "name": row["name"],
             "city": row["city"],
