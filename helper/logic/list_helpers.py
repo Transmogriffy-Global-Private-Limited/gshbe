@@ -9,8 +9,8 @@ async def list_helpers():
 
     print("👉 Fetching personal helpers...")
 
-    personal_rows = (
-        await HelperPersonal
+    personal_rows = await (
+        HelperPersonal
         .select(
             HelperPersonal.registration,
             HelperPersonal.name,
@@ -24,7 +24,7 @@ async def list_helpers():
             HelperPersonal.avg_rating,
             HelperPersonal.rating_count,
         )
-        .join(Registration)
+        .join_on(HelperPersonal.registration, Registration.id)
         .where(
             Registration.role == "helper",
             Registration.capacity == "personal",
@@ -52,8 +52,8 @@ async def list_helpers():
 
     print("👉 Fetching institutional helpers...")
 
-    institutional_rows = (
-        await HelperInstitutional
+    institutional_rows = await (
+        HelperInstitutional
         .select(
             HelperInstitutional.registration,
             HelperInstitutional.name,
@@ -63,7 +63,7 @@ async def list_helpers():
             HelperInstitutional.avg_rating,
             HelperInstitutional.rating_count,
         )
-        .join(Registration)
+        .join_on(HelperInstitutional.registration, Registration.id)
         .where(
             Registration.role == "helper",
             Registration.capacity == "institutional",
