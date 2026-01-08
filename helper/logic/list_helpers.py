@@ -1,16 +1,8 @@
-from db.tables import (
-    Registration,
-    HelperPersonal,
-    HelperInstitutional,
-)
-
-
 async def list_helpers():
     helpers = []
 
-    # -------------------------
-    # PERSONAL HELPERS
-    # -------------------------
+    print("👉 Fetching personal helpers...")
+
     personal_rows = await HelperPersonal.select(
         HelperPersonal.registration,
         HelperPersonal.name,
@@ -29,9 +21,14 @@ async def list_helpers():
         HelperPersonal.registration.is_online == True,
     )
 
+    print("✅ Personal rows:", personal_rows)
+    print("🔢 Personal count:", len(personal_rows))
+
     for row in personal_rows:
+        print("➡️ Personal helper row:", row)
+
         helpers.append({
-            "registration_id": row["registration"],  # UUID (no str())
+            "registration_id": row["registration"],
             "type": "personal",
             "name": row["name"],
             "age": row["age"],
@@ -45,33 +42,6 @@ async def list_helpers():
             "rating_count": row["rating_count"],
         })
 
-    # -------------------------
-    # INSTITUTIONAL HELPERS
-    # -------------------------
-    institutional_rows = await HelperInstitutional.select(
-        HelperInstitutional.registration,
-        HelperInstitutional.name,
-        HelperInstitutional.city,
-        HelperInstitutional.address,
-        HelperInstitutional.phone,
-        HelperInstitutional.avg_rating,
-        HelperInstitutional.rating_count,
-    ).where(
-        HelperInstitutional.registration.role == "helper",
-        HelperInstitutional.registration.capacity == "institutional",
-        HelperInstitutional.registration.is_online == True,
-    )
-
-    for row in institutional_rows:
-        helpers.append({
-            "registration_id": row["registration"],  # UUID
-            "type": "institutional",
-            "name": row["name"],
-            "city": row["city"],
-            "address": row["address"],
-            "phone": row["phone"],
-            "avg_rating": row["avg_rating"],
-            "rating_count": row["rating_count"],
-        })
+    print("📦 Helpers after personal:", helpers)
 
     return helpers
