@@ -2,6 +2,15 @@ from __future__ import annotations
 
 from typing import List, Optional, Literal
 from pydantic import BaseModel, Field
+from pydantic import BaseModel
+
+class HelperOut(BaseModel):
+    registration_id: str
+    city: str | None
+    area: str | None
+
+class HelperListOut(BaseModel):
+    items: list[HelperOut]
 
 
 JobType = Literal["part_time", "full_time", "one_time", "subscription"]
@@ -58,3 +67,31 @@ class HelperExperienceOut(BaseModel):
 
 class DeleteOut(BaseModel):
     deleted: bool = Field(True, examples=[True])
+
+# ----------------------------
+# Helper List (Public)
+# ----------------------------
+
+class HelperPersonalProfileOut(BaseModel):
+    name: str
+    age: int
+    faith: Optional[str] = None
+    languages: Optional[str] = None
+    city: Optional[str] = None
+    area: Optional[str] = None
+    phone: Optional[str] = None
+    years_of_experience: Optional[int] = None
+    avg_rating: Optional[str] = None
+    rating_count: Optional[int] = None
+
+
+class HelperListItemOut(BaseModel):
+    registration_id: str
+    role: Literal["helper"]
+    capacity: Literal["personal", "institutional"]
+    profile_kind: str
+    profile: HelperPersonalProfileOut
+
+
+class HelperListOut(BaseModel):
+    items: List[HelperListItemOut]

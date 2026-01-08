@@ -3,14 +3,14 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from piccolo.engine import engine_finder
+from dotenv import load_dotenv
 
 from auth.endpoints.router import router as auth_router
 from profiles.endpoints.router import router as profiles_router
 from helper.endpoints.router import router as helper_router
 
-from dotenv import load_dotenv
-
 load_dotenv()
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -21,24 +21,23 @@ async def lifespan(app: FastAPI):
     finally:
         await engine.close_connection_pool()
 
+
 app = FastAPI(
     title="gshbe API",
     version="0.1.0",
     lifespan=lifespan,
-    docs_url="/swagger",
+    docs_url="/swagger",   # ✅ Swagger available here
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],          # allow all origins
-    allow_credentials=False,      # MUST be False when origins=["*"]
-    allow_methods=["*"],          # allow all HTTP methods
-    allow_headers=["*"],          # allow all headers
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
+# ✅ ROUTERS (ONLY ONCE)
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(profiles_router, prefix="/profiles", tags=["profiles"])
 app.include_router(helper_router, prefix="/helper", tags=["helper"])
-from helper.endpoints.router import router as helper_router
-
-app.include_router(helper_router)

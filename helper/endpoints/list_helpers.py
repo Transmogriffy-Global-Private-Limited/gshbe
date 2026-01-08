@@ -1,8 +1,15 @@
-from fastapi import APIRouter
-from helper.logic.list_helpers import list_helpers
+from fastapi import APIRouter, status
+from helper.logic.list_helpers import list_helpers_service
+from helper.structs.dtos import HelperListOut
 
 router = APIRouter()
 
-@router.get("/helper/list_helpers")
-async def get_helpers():
-    return await list_helpers()
+@router.get(
+    "/list",
+    response_model=HelperListOut,
+    status_code=status.HTTP_200_OK,
+    summary="List available helpers",
+)
+async def list_helpers_endpoint():
+    helpers = await list_helpers_service()
+    return HelperListOut(items=helpers)
