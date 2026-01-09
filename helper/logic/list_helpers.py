@@ -12,17 +12,17 @@ from helper.structs.dtos import (
 
 async def list_helpers_service() -> HelperListOut:
     registrations = await Registration.objects().where(
-        Registration.role == "helper"
+        Registration.role == "helper"   # ✅ ONLY real columns
     )
 
     items = []
 
     for reg in registrations:
 
-        # -------- PERSONAL --------
+        # ---------- PERSONAL ----------
         if reg.capacity == "personal":
             profile = await HelperPersonal.objects().where(
-                HelperPersonal.registration == reg.id   # ✅ FIX
+                HelperPersonal.registration == reg.id   # ✅ FIXED
             ).first()
 
             if not profile:
@@ -30,7 +30,7 @@ async def list_helpers_service() -> HelperListOut:
 
             profile_out = HelperPersonalProfileOut(
                 id=str(profile.id),
-                registration=str(reg.id),               # ✅ FIX
+                registration=str(reg.id),               # ✅ FIXED
                 name=profile.name,
                 age=profile.age,
                 faith=profile.faith,
@@ -43,10 +43,10 @@ async def list_helpers_service() -> HelperListOut:
                 rating_count=profile.rating_count,
             )
 
-        # -------- INSTITUTIONAL --------
+        # ---------- INSTITUTIONAL ----------
         else:
             profile = await HelperInstitutional.objects().where(
-                HelperInstitutional.code == str(reg.id) # ✅ FIX
+                HelperInstitutional.code == str(reg.id) # ✅ FIXED
             ).first()
 
             if not profile:
@@ -54,7 +54,7 @@ async def list_helpers_service() -> HelperListOut:
 
             profile_out = HelperInstitutionalProfileOut(
                 id=str(profile.id),
-                registration=str(reg.id),               # ✅ FIX
+                registration=str(reg.id),               # ✅ FIXED
                 name=profile.name,
                 city=None,
                 address=None,
@@ -65,7 +65,7 @@ async def list_helpers_service() -> HelperListOut:
 
         items.append(
             HelperListItemOut(
-                registration_id=str(reg.id),             # ✅ FIX
+                registration_id=str(reg.id),             # ✅ OUTPUT FIELD OK
                 role="helper",
                 capacity=reg.capacity,
                 profile_kind=reg.profile_kind,
