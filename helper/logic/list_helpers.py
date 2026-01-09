@@ -1,8 +1,7 @@
-from helper.tables import (
-    Registration,
-    HelperPersonalProfile,
-    HelperInstitutionalProfile,
-)
+from helper.tables.registration import Registration
+from helper.tables.personal import HelperPersonalProfile
+from helper.tables.institutional import HelperInstitutionalProfile
+
 from helper.structs.dtos import (
     HelperListOut,
     HelperListItemOut,
@@ -12,25 +11,30 @@ from helper.structs.dtos import (
 
 
 async def list_helpers_service() -> HelperListOut:
-    # 1️⃣ Fetch helper registrations
+    # 1️⃣ Fetch all helper registrations
     registrations = await Registration.objects().where(
         Registration.role == "helper"
     )
 
-    items = []
+    items: list[HelperListItemOut] = []
 
     for reg in registrations:
+        # ==========================
+        # PERSONAL HELPER
+        # ==========================
         if reg.capacity == "personal":
-            profile = await HelperPersonalProfile.objects().where(
-                HelperPersonalProfile.registration == reg.id
-            ).first()
+            profile = (
+                await HelperPersonalProfile.objects()
+                .where(HelperPersonalProfile.registration == reg.id)
+                .first()
+            )
 
             if not profile:
                 continue
 
             profile_out = HelperPersonalProfileOut(
                 id=profile.id,
-                registration=reg.id,
+                registration=str(reg.id),
                 name=profile.name,
                 age=profile.age,
                 faith=profile.faith,
@@ -39,32 +43,48 @@ async def list_helpers_service() -> HelperListOut:
                 area=profile.area,
                 phone=profile.phone,
                 years_of_experience=profile.years_of_experience,
-                avg_rating=str(profile.avg_rating) if profile.avg_rating else None,
+                avg_rating=str(profile.avg_rating)
+                if profile.avg_rating is not None
+                else None,
                 rating_count=profile.rating_count,
             )
 
-        else:  # institutional
-            profile = await HelperInstitutionalProfile.objects().where(
-                HelperInstitutionalProfile.registration == reg.id
-            ).first()
+        # ==========================
+        # INSTITUTIONAL HELPER
+        # ==========================
+        elif reg.capacity == "institutional":
+            profile = (
+                await HelperInstitutionalProfile.objects()
+                .where(HelperInstitutionalProfile.registration == reg.id)
+                .first()
+            )
 
             if not profile:
                 continue
 
             profile_out = HelperInstitutionalProfileOut(
                 id=profile.id,
-                registration=reg.id,
+                registration=str(reg.id),
                 name=profile.name,
                 city=profile.city,
                 address=profile.address,
                 phone=profile.phone,
-                avg_rating=str(profile.avg_rating) if profile.avg_rating else None,
+                avg_rating=str(profile.avg_rating)
+                if profile.avg_rating is not None
+                else None,
                 rating_count=profile.rating_count,
             )
 
+        else:
+            # Unknown capacity → skip safely
+            continue
+
+        # ==========================
+        # RESPONSE ITEM
+        # ==========================
         items.append(
             HelperListItemOut(
-                registration_id=reg.id,
+                registration_id=str(reg.id),
                 role="helper",
                 capacity=reg.capacity,
                 profile_kind=f"helper_{reg.capacity}",
