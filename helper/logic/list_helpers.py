@@ -1,5 +1,5 @@
-from helper.tables.helpers import HelperPersonal, HelperInstitutional
-from registration.tables.registration import Registration
+from helper.tables.personal import HelperPersonal, Registration
+from helper.tables.institutional import HelperInstitutional
 
 from helper.structs.dtos import (
     HelperListOut,
@@ -21,7 +21,7 @@ async def list_helpers_service():
         # PERSONAL HELPERS
         if reg.capacity == "personal":
             profile = await HelperPersonal.objects().where(
-                HelperPersonal.registration == reg.id
+                HelperPersonal.registration == reg.registration_id
             ).first()
 
             if not profile:
@@ -29,7 +29,7 @@ async def list_helpers_service():
 
             profile_out = HelperPersonalProfileOut(
                 id=profile.id,
-                registration=str(reg.id),
+                registration=str(reg.registration_id),
                 name=profile.name,
                 age=profile.age,
                 faith=profile.faith,
@@ -45,7 +45,7 @@ async def list_helpers_service():
         # INSTITUTIONAL HELPERS
         else:
             profile = await HelperInstitutional.objects().where(
-                HelperInstitutional.code == str(reg.id)
+                HelperInstitutional.code == str(reg.registration_id)
             ).first()
 
             if not profile:
@@ -53,7 +53,7 @@ async def list_helpers_service():
 
             profile_out = HelperInstitutionalProfileOut(
                 id=profile.id,
-                registration=str(reg.id),
+                registration=str(reg.registration_id),
                 name=profile.name,
                 city=None,
                 address=None,
@@ -64,7 +64,7 @@ async def list_helpers_service():
 
         items.append(
             HelperListItemOut(
-                registration_id=str(reg.id),
+                registration_id=str(reg.registration_id),
                 role="helper",
                 capacity=reg.capacity,
                 profile_kind=reg.profile_kind,
