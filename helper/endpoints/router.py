@@ -27,20 +27,24 @@ router.include_router(list_helpers_router)
 
 from helper.endpoints.list_helpers import router as list_helpers_router
 router = APIRouter(tags=["helper"])
-# ✅ import sub-router ONCE
-from helper.endpoints.list_helpers import router as list_helpers_router
 
-
-# ✅ CREATE ROUTER ONLY ONCE
-router = APIRouter(tags=["helper"])
-
-# ✅ INCLUDE SUB-ROUTER ONLY ONCE
-router.include_router(list_helpers_router)
 
 # ----------------------------
 # Public (ANYONE)
 # ----------------------------
+@router.get(
 
+    "/helpers",
+
+    response_model=HelperListOut,
+
+)
+
+async def list_helpers():
+
+    return await list_helpers_service()
+
+ 
 @router.get(
     "/{registration_id}/preferences",
     response_model=HelperPreferenceOut,
