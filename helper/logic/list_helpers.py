@@ -27,7 +27,7 @@ async def list_helpers_service() -> HelperListOut:
                 continue
 
             profile_out = HelperPersonalProfileOut(
-                id=profile.id,
+                id=profile.pk,                      # ✅ FIXED
                 registration=str(reg.id),
                 name=profile.name,
                 age=profile.age,
@@ -37,7 +37,9 @@ async def list_helpers_service() -> HelperListOut:
                 area=profile.area,
                 phone=profile.phone,
                 years_of_experience=profile.years_of_experience,
-                avg_rating=str(profile.avg_rating),
+                avg_rating=str(profile.avg_rating)
+                if profile.avg_rating is not None
+                else None,
                 rating_count=profile.rating_count,
             )
 
@@ -50,7 +52,7 @@ async def list_helpers_service() -> HelperListOut:
                 continue
 
             profile_out = HelperInstitutionalProfileOut(
-                id=profile.id,
+                id=profile.pk,                      # ✅ FIXED
                 registration=str(reg.id),
                 name=profile.name,
                 city=None,
