@@ -11,18 +11,18 @@ from helper.structs.dtos import (
 
 
 async def list_helpers_service() -> HelperListOut:
-    # 1️⃣ Get all helper registrations
     registrations = await Registration.objects().where(
         Registration.role == "helper"
     )
 
-    items: list[HelperListItemOut] = []
+    items = []
 
     for reg in registrations:
-        # ---------------- PERSONAL HELPER ----------------
+
+        # -------- PERSONAL --------
         if reg.capacity == "personal":
             profile = await HelperPersonal.objects().where(
-                HelperPersonal.registration == reg.registration_id
+                HelperPersonal.registration == reg.id   # ✅ FIX
             ).first()
 
             if not profile:
@@ -30,7 +30,7 @@ async def list_helpers_service() -> HelperListOut:
 
             profile_out = HelperPersonalProfileOut(
                 id=str(profile.id),
-                registration=str(reg.registration_id),
+                registration=str(reg.id),               # ✅ FIX
                 name=profile.name,
                 age=profile.age,
                 faith=profile.faith,
@@ -39,14 +39,14 @@ async def list_helpers_service() -> HelperListOut:
                 area=profile.area,
                 phone=profile.phone,
                 years_of_experience=profile.years_of_experience,
-                avg_rating=str(profile.avg_rating) if profile.avg_rating is not None else None,
+                avg_rating=str(profile.avg_rating) if profile.avg_rating else None,
                 rating_count=profile.rating_count,
             )
 
-        # ---------------- INSTITUTIONAL HELPER ----------------
+        # -------- INSTITUTIONAL --------
         else:
             profile = await HelperInstitutional.objects().where(
-                HelperInstitutional.code == str(reg.registration_id)
+                HelperInstitutional.code == str(reg.id) # ✅ FIX
             ).first()
 
             if not profile:
@@ -54,7 +54,7 @@ async def list_helpers_service() -> HelperListOut:
 
             profile_out = HelperInstitutionalProfileOut(
                 id=str(profile.id),
-                registration=str(reg.registration_id),
+                registration=str(reg.id),               # ✅ FIX
                 name=profile.name,
                 city=None,
                 address=None,
@@ -63,10 +63,9 @@ async def list_helpers_service() -> HelperListOut:
                 rating_count=0,
             )
 
-        # ---------------- RESPONSE ITEM ----------------
         items.append(
             HelperListItemOut(
-                registration_id=str(reg.registration_id),
+                registration_id=str(reg.id),             # ✅ FIX
                 role="helper",
                 capacity=reg.capacity,
                 profile_kind=reg.profile_kind,
