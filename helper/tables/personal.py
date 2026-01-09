@@ -1,25 +1,22 @@
 from piccolo.table import Table
 from piccolo.columns import (
-    Serial,
-    UUID,
-    Varchar,
+    ForeignKey,
     Integer,
+    Text,
 )
+from helper.tables.registration import Registration
 
 
 class HelperPersonal(Table):
-    id = Serial(primary_key=True)
+    registration = ForeignKey(Registration)
 
-    registration = UUID()
-
-    name = Varchar()
+    name = Text()
     age = Integer()
-    faith = Varchar()
-    languages = Varchar()
-    city = Varchar()
-    area = Varchar()
-    phone = Varchar(null=True)
-
+    faith = Text()
+    languages = Text()
+    city = Text()
+    area = Text()
+    phone = Text()
     years_of_experience = Integer()
-    avg_rating = Varchar(default="0")
+    avg_rating = Integer(default=0)
     rating_count = Integer(default=0)

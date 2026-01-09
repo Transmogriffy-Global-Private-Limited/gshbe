@@ -11,33 +11,31 @@ from helper.structs.dtos import (
 
 
 async def list_helpers_service() -> HelperListOut:
-    helpers: list[HelperListItemOut] = []
+    items: list[HelperListItemOut] = []
 
-    # IMPORTANT:
-    # registration_id IS THE PRIMARY KEY, NOT A COLUMN
     registrations = await Registration.objects().where(
         Registration.role == "helper"
     )
 
     for reg in registrations:
-        # PERSONAL HELPERS
+        # PERSONAL
         if reg.profile_kind == "helper_personal":
             profile = await HelperPersonal.objects().where(
-                HelperPersonal.registration == reg.registration_id
+                HelperPersonal.registration == reg.id
             ).first()
 
             if not profile:
                 continue
 
-            helpers.append(
+            items.append(
                 HelperListItemOut(
-                    registration_id=str(reg.registration_id),
+                    registration_id=str(reg.id),
                     role=reg.role,
                     capacity=reg.capacity,
                     profile_kind=reg.profile_kind,
                     profile=HelperPersonalProfileOut(
                         id=profile.id,
-                        registration=str(profile.registration),
+                        registration=str(reg.id),
                         name=profile.name,
                         age=profile.age,
                         faith=profile.faith,
@@ -52,24 +50,24 @@ async def list_helpers_service() -> HelperListOut:
                 )
             )
 
-        # INSTITUTIONAL HELPERS
+        # INSTITUTIONAL
         elif reg.profile_kind == "helper_institutional":
             profile = await HelperInstitutional.objects().where(
-                HelperInstitutional.registration == reg.registration_id
+                HelperInstitutional.registration == reg.id
             ).first()
 
             if not profile:
                 continue
 
-            helpers.append(
+            items.append(
                 HelperListItemOut(
-                    registration_id=str(reg.registration_id),
+                    registration_id=str(reg.id),
                     role=reg.role,
                     capacity=reg.capacity,
                     profile_kind=reg.profile_kind,
                     profile=HelperInstitutionalProfileOut(
                         id=profile.id,
-                        registration=str(profile.registration),
+                        registration=str(reg.id),
                         institution_name=profile.institution_name,
                         city=profile.city,
                         area=profile.area,
@@ -80,4 +78,4 @@ async def list_helpers_service() -> HelperListOut:
                 )
             )
 
-    return HelperListOut(items=helpers)
+    return HelperListOut(items=items)
