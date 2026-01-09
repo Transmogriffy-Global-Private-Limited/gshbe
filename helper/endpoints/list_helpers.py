@@ -4,10 +4,9 @@ from helper.structs.dtos import HelperListOut
 
 router = APIRouter()
 
-
 @router.get(
-    "/list_helpers",
-    response_model=HelperListOut,
+    "/helpers",
+    response_model=HelperListOut
 )
 async def list_helpers_endpoint():
     return await list_helpers_service()
