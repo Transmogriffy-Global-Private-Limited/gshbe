@@ -1,10 +1,14 @@
-# helper/tables/institutional.py
-
 from piccolo.table import Table
-from piccolo.columns import Varchar, Integer
+from piccolo.columns import UUID, Varchar, Integer
 
 
 class HelperInstitutional(Table):
-    name = Varchar(length=255)
-    code = Varchar(length=100, unique=True)
-    is_active = Integer(default=1)
+    registration = UUID(primary_key=True)
+
+    name = Varchar()
+    city = Varchar(null=True)
+    address = Varchar(null=True)
+    phone = Varchar(null=True)
+
+    avg_rating = Varchar(default="0")
+    rating_count = Integer(default=0)

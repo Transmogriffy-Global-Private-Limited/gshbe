@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Optional, Literal
+from typing import List, Optional, Literal, Union
 from pydantic import BaseModel, Field
 
 
@@ -20,7 +20,6 @@ class DeleteOut(BaseModel):
 # =====================================================
 
 class HelperPersonalProfileOut(BaseModel):
-    id: int
     registration: str
     name: str
     age: Optional[int] = None
@@ -30,18 +29,17 @@ class HelperPersonalProfileOut(BaseModel):
     area: Optional[str] = None
     phone: Optional[str] = None
     years_of_experience: Optional[int] = None
-    avg_rating: Optional[str] = None   # ✅ STRING (fixes Decimal error)
+    avg_rating: Optional[str] = None
     rating_count: Optional[int] = None
 
 
 class HelperInstitutionalProfileOut(BaseModel):
-    id: int
     registration: str
     name: str
     city: Optional[str] = None
     address: Optional[str] = None
     phone: Optional[str] = None
-    avg_rating: Optional[str] = None   # ✅ STRING
+    avg_rating: Optional[str] = None
     rating_count: Optional[int] = None
 
 
@@ -50,7 +48,10 @@ class HelperListItemOut(BaseModel):
     role: Literal["helper"]
     capacity: Literal["personal", "institutional"]
     profile_kind: Literal["helper_personal", "helper_institutional"]
-    profile: HelperPersonalProfileOut | HelperInstitutionalProfileOut
+    profile: Union[
+        HelperPersonalProfileOut,
+        HelperInstitutionalProfileOut,
+    ]
 
 
 class HelperListOut(BaseModel):

@@ -1,9 +1,9 @@
 from piccolo.table import Table
-from piccolo.columns import UUID, Varchar, Integer
+from piccolo.columns import UUID, Varchar
 
 
 class Registration(Table):
     registration_id = UUID(primary_key=True)
-    role = Varchar()
-    capacity = Varchar()
-    profile_kind = Varchar()
+    role = Varchar()              # helper / user / both
+    capacity = Varchar()          # personal / institutional
+    profile_kind = Varchar()      # helper_personal / helper_institutional
