@@ -2,23 +2,64 @@ from __future__ import annotations
 
 from typing import List, Optional, Literal
 from pydantic import BaseModel, Field
-from pydantic import BaseModel
 
-class HelperOut(BaseModel):
-    registration_id: str
-    city: str | None
-    area: str | None
 
-class HelperListOut(BaseModel):
-    items: list[HelperOut]
-
+# =====================================================
+# COMMON
+# =====================================================
 
 JobType = Literal["part_time", "full_time", "one_time", "subscription"]
 
 
-# ----------------------------
-# Preference
-# ----------------------------
+class DeleteOut(BaseModel):
+    deleted: bool = Field(True, examples=[True])
+
+
+# =====================================================
+# HELPER LIST (PUBLIC)
+# =====================================================
+
+class HelperPersonalProfileOut(BaseModel):
+    id: int
+    registration: str
+    name: str
+    age: Optional[int] = None
+    faith: Optional[str] = None
+    languages: Optional[str] = None
+    city: Optional[str] = None
+    area: Optional[str] = None
+    phone: Optional[str] = None
+    years_of_experience: Optional[int] = None
+    avg_rating: Optional[str] = None   # ✅ STRING (fixes Decimal error)
+    rating_count: Optional[int] = None
+
+
+class HelperInstitutionalProfileOut(BaseModel):
+    id: int
+    registration: str
+    name: str
+    city: Optional[str] = None
+    address: Optional[str] = None
+    phone: Optional[str] = None
+    avg_rating: Optional[str] = None   # ✅ STRING
+    rating_count: Optional[int] = None
+
+
+class HelperListItemOut(BaseModel):
+    registration_id: str
+    role: Literal["helper"]
+    capacity: Literal["personal", "institutional"]
+    profile_kind: Literal["helper_personal", "helper_institutional"]
+    profile: HelperPersonalProfileOut | HelperInstitutionalProfileOut
+
+
+class HelperListOut(BaseModel):
+    items: List[HelperListItemOut]
+
+
+# =====================================================
+# PREFERENCE
+# =====================================================
 
 class HelperPreferenceUpsertIn(BaseModel):
     city: Optional[str] = Field(None, examples=["Kolkata"])
@@ -39,9 +80,9 @@ class HelperPreferenceOut(BaseModel):
     preferred_service_ids: List[str] = Field(default_factory=list)
 
 
-# ----------------------------
-# Experience
-# ----------------------------
+# =====================================================
+# EXPERIENCE
+# =====================================================
 
 class HelperExperienceIn(BaseModel):
     year_from: Optional[int] = Field(None, ge=1900, le=2100, examples=[2019])
@@ -50,7 +91,8 @@ class HelperExperienceIn(BaseModel):
     city: Optional[str] = Field(None, examples=["Kolkata"])
     area: Optional[str] = Field(None, examples=["Behala"])
     description: Optional[str] = Field(
-        None, examples=["Worked as a home nurse for elderly patients."]
+        None,
+        examples=["Worked as a home nurse for elderly patients."],
     )
 
 
@@ -63,35 +105,3 @@ class HelperExperienceOut(BaseModel):
     city: Optional[str] = None
     area: Optional[str] = None
     description: Optional[str] = None
-
-
-class DeleteOut(BaseModel):
-    deleted: bool = Field(True, examples=[True])
-
-# ----------------------------
-# Helper List (Public)
-# ----------------------------
-
-class HelperPersonalProfileOut(BaseModel):
-    name: str
-    age: int
-    faith: Optional[str] = None
-    languages: Optional[str] = None
-    city: Optional[str] = None
-    area: Optional[str] = None
-    phone: Optional[str] = None
-    years_of_experience: Optional[int] = None
-    avg_rating: Optional[str] = None
-    rating_count: Optional[int] = None
-
-
-class HelperListItemOut(BaseModel):
-    registration_id: str
-    role: Literal["helper"]
-    capacity: Literal["personal", "institutional"]
-    profile_kind: str
-    profile: HelperPersonalProfileOut
-
-
-class HelperListOut(BaseModel):
-    items: List[HelperListItemOut]
