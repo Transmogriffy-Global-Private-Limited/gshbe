@@ -4,7 +4,8 @@ from datetime import datetime
 
 
 class Admin(Table):
-    email = Varchar(unique=True, index=True)
+    name = Varchar(length=100)
+    phone_number = Varchar(length=15, unique=True, index=True)
     password_hash = Varchar()
     is_active = Boolean(default=True)
     created_at = Timestamp(default=datetime.utcnow)
