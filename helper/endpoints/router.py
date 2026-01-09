@@ -1,4 +1,4 @@
-'''from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status
 
 from auth.logic.deps import get_current_account_id
 from helper.logic.service import (
@@ -32,17 +32,6 @@ router = APIRouter(tags=["helper"])
 # ----------------------------
 # Public (ANYONE)
 # ----------------------------
-@router.get(
-
-    "/helpers",
-
-    response_model=HelperListOut,
-
-)
-
-async def list_helpers():
-
-    return await list_helpers_service()
 
  
 @router.get(
@@ -416,164 +405,6 @@ from fastapi import APIRouter
 from helper.endpoints.list_helpers import router as list_helpers_router
 
 router = APIRouter()
-router.include_router(list_helpers_router)'''
+router.include_router(list_helpers_router)
 
-from fastapi import APIRouter, Depends, status
- 
-from auth.logic.deps import get_current_account_id
- 
-# =======================
-# SERVICES
-# =======================
-from helper.logic.service import (
-    get_preference_by_registration_id,
-    list_experience_by_registration_id,
-    get_my_preference,
-    upsert_my_preference,
-    list_my_experience,
-    create_my_experience,
-    update_my_experience,
-    delete_my_experience,
-)
- 
-from helper.services.list_helpers import list_helpers_service
- 
-# =======================
-# DTOs
-# =======================
-from helper.structs.dtos import (
-    HelperListOut,
-    HelperPreferenceUpsertIn,
-    HelperPreferenceOut,
-    HelperExperienceIn,
-    HelperExperienceOut,
-    DeleteOut,
-)
- 
-router = APIRouter(
-    prefix="/helper",
-    tags=["helper"],
-)
- 
-# =====================================================
-# PUBLIC (ANYONE)
-# =====================================================
- 
-@router.get(
-    "/helpers",
-    response_model=HelperListOut,
-    status_code=status.HTTP_200_OK,
-)
-async def list_helpers():
-    return await list_helpers_service()
- 
- 
-@router.get(
-    "/{registration_id}/preferences",
-    response_model=HelperPreferenceOut,
-    status_code=status.HTTP_200_OK,
-)
-async def get_public_preference(registration_id: str):
-    return await get_preference_by_registration_id(
-        registration_id=registration_id
-    )
- 
- 
-@router.get(
-    "/{registration_id}/experience",
-    response_model=list[HelperExperienceOut],
-    status_code=status.HTTP_200_OK,
-)
-async def get_public_experience(registration_id: str):
-    return await list_experience_by_registration_id(
-        registration_id=registration_id
-    )
- 
- 
-# =====================================================
-# OWNER ONLY
-# =====================================================
- 
-@router.get(
-    "/preferences/me",
-    response_model=HelperPreferenceOut,
-    status_code=status.HTTP_200_OK,
-)
-async def get_preference_me(
-    account_id: str = Depends(get_current_account_id),
-):
-    return await get_my_preference(account_id=account_id)
- 
- 
-@router.put(
-    "/preferences/me",
-    response_model=HelperPreferenceOut,
-    status_code=status.HTTP_200_OK,
-)
-async def put_preference_me(
-    payload: HelperPreferenceUpsertIn,
-    account_id: str = Depends(get_current_account_id),
-):
-    return await upsert_my_preference(
-        account_id=account_id,
-        payload=payload.model_dump(exclude_unset=True),
-    )
- 
- 
-@router.get(
-    "/experience/me",
-    response_model=list[HelperExperienceOut],
-    status_code=status.HTTP_200_OK,
-)
-async def get_experience_me(
-    account_id: str = Depends(get_current_account_id),
-):
-    return await list_my_experience(account_id=account_id)
- 
- 
-@router.post(
-    "/experience/me",
-    response_model=HelperExperienceOut,
-    status_code=status.HTTP_201_CREATED,
-)
-async def post_experience_me(
-    payload: HelperExperienceIn,
-    account_id: str = Depends(get_current_account_id),
-):
-    return await create_my_experience(
-        account_id=account_id,
-        payload=payload.model_dump(exclude_unset=True),
-    )
- 
- 
-@router.put(
-    "/experience/me/{experience_id}",
-    response_model=HelperExperienceOut,
-    status_code=status.HTTP_200_OK,
-)
-async def put_experience_me(
-    experience_id: str,
-    payload: HelperExperienceIn,
-    account_id: str = Depends(get_current_account_id),
-):
-    return await update_my_experience(
-        account_id=account_id,
-        experience_id=experience_id,
-        payload=payload.model_dump(exclude_unset=True),
-    )
- 
- 
-@router.delete(
-    "/experience/me/{experience_id}",
-    response_model=DeleteOut,
-    status_code=status.HTTP_200_OK,
-)
-async def del_experience_me(
-    experience_id: str,
-    account_id: str = Depends(get_current_account_id),
-):
-    return await delete_my_experience(
-        account_id=account_id,
-        experience_id=experience_id,
-    )
 
