@@ -13,19 +13,17 @@ from helper.structs.dtos import (
 async def list_helpers_service() -> HelperListOut:
     items: list[HelperListItemOut] = []
 
+    # Fetch ALL helper registrations
     registrations = await Registration.objects().where(
         Registration.role == "helper"
     )
 
     for reg in registrations:
-        # PERSONAL
+        # ---------------- PERSONAL HELPERS ----------------
         if reg.profile_kind == "helper_personal":
-            profile = await HelperPersonal.objects().where(
+            profile = await HelperPersonal.objects().get(
                 HelperPersonal.registration == reg.id
-            ).first()
-
-            if not profile:
-                continue
+            )
 
             items.append(
                 HelperListItemOut(
@@ -50,14 +48,11 @@ async def list_helpers_service() -> HelperListOut:
                 )
             )
 
-        # INSTITUTIONAL
+        # -------------- INSTITUTIONAL HELPERS --------------
         elif reg.profile_kind == "helper_institutional":
-            profile = await HelperInstitutional.objects().where(
+            profile = await HelperInstitutional.objects().get(
                 HelperInstitutional.registration == reg.id
-            ).first()
-
-            if not profile:
-                continue
+            )
 
             items.append(
                 HelperListItemOut(
@@ -76,6 +71,13 @@ async def list_helpers_service() -> HelperListOut:
                         rating_count=profile.rating_count,
                     ),
                 )
+            )
+
+        # ---------------- UNKNOWN PROFILE ------------------
+        else:
+            raise ValueError(
+                f"Unknown profile_kind '{reg.profile_kind}' "
+                f"for registration {reg.id}"
             )
 
     return HelperListOut(items=items)
