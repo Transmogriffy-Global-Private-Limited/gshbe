@@ -1,5 +1,3 @@
-'''from __future__ import annotations
-
 from typing import List, Optional, Literal, Union
 from pydantic import BaseModel, Field
 
@@ -7,7 +5,7 @@ from pydantic import BaseModel, Field
 # =====================================================
 # COMMON
 # =====================================================
-
+'''
 JobType = Literal["part_time", "full_time", "one_time", "subscription"]
 
 
@@ -106,10 +104,10 @@ class HelperExperienceOut(BaseModel):
     city: Optional[str] = None
     area: Optional[str] = None
     description: Optional[str] = None'''
-from __future__ import annotations
+'''from __future__ import annotations
  
 from typing import List, Optional, Literal, Union
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field'''
  
  
 # =====================================================
