@@ -20,7 +20,7 @@ async def list_helpers_service() -> HelperListOut:
     for reg in registrations:
         if reg.capacity == "personal":
             profile = await HelperPersonal.objects().where(
-                HelperPersonal.registration == reg.registration_id
+                HelperPersonal.registration == reg.id
             ).first()
 
             if not profile:
@@ -28,7 +28,7 @@ async def list_helpers_service() -> HelperListOut:
 
             profile_out = HelperPersonalProfileOut(
                 id=profile.id,
-                registration=reg.registration_id,
+                registration=str(reg.id),
                 name=profile.name,
                 age=profile.age,
                 faith=profile.faith,
@@ -41,9 +41,9 @@ async def list_helpers_service() -> HelperListOut:
                 rating_count=profile.rating_count,
             )
 
-        else:
+        else:  # institutional
             profile = await HelperInstitutional.objects().where(
-                HelperInstitutional.code == reg.registration_id
+                HelperInstitutional.code == str(reg.id)
             ).first()
 
             if not profile:
@@ -51,7 +51,7 @@ async def list_helpers_service() -> HelperListOut:
 
             profile_out = HelperInstitutionalProfileOut(
                 id=profile.id,
-                registration=reg.registration_id,
+                registration=str(reg.id),
                 name=profile.name,
                 city=None,
                 address=None,
@@ -62,7 +62,7 @@ async def list_helpers_service() -> HelperListOut:
 
         items.append(
             HelperListItemOut(
-                registration_id=reg.registration_id,
+                registration_id=str(reg.id),
                 role="helper",
                 capacity=reg.capacity,
                 profile_kind=f"helper_{reg.capacity}",
