@@ -1,67 +1,86 @@
 from helper.tables.registration import Registration
+from helper.tables.helpers import Helper
 from helper.tables.personal import HelperPersonal
 from helper.tables.institutional import HelperInstitutional
 
 
 async def list_helpers_service():
-    helpers = []
-
+    # 1️⃣ Get all helper registrations
     registrations = await Registration.objects().where(
         Registration.role == "helper"
     )
 
-    reg_map = {str(r.registration_id): r for r in registrations}
+    if not registrations:
+        return []
 
-    # ---------------- PERSONAL ----------------
-    personal_rows = await HelperPersonal.objects()
+    registration_ids = [r["registration_id"] for r in registrations]
 
-    for p in personal_rows:
-        reg = reg_map.get(str(p.registration))
-        if not reg or reg.capacity != "personal":
-            continue
+    # 2️⃣ Load helpers
+    helpers = await Helper.objects().where(
+        Helper.is_active == 1
+    )
 
-        helpers.append({
-            "registration_id": str(p.registration),
-            "role": reg.role,
-            "capacity": reg.capacity,
-            "profile_kind": reg.profile_kind,
-            "profile": {
-                "registration": str(p.registration),
-                "name": p.name,
-                "age": p.age,
-                "faith": p.faith,
-                "languages": p.languages,
-                "city": p.city,
-                "area": p.area,
-                "phone": p.phone,
-                "years_of_experience": p.years_of_experience,
-                "avg_rating": p.avg_rating,
-                "rating_count": p.rating_count,
-            },
-        })
+    # 3️⃣ Load personal + institutional profiles
+    personals = await HelperPersonal.objects().where(
+        HelperPersonal.registration.is_in(registration_ids)
+    )
 
-    # ---------------- INSTITUTIONAL ----------------
-    institutional_rows = await HelperInstitutional.objects()
+    institutionals = await HelperInstitutional.objects().where(
+        HelperInstitutional.code.is_not_null()
+    )
 
-    for i in institutional_rows:
-        reg = reg_map.get(str(i.registration))
-        if not reg or reg.capacity != "institutional":
-            continue
+    personal_map = {p["registration"]: p for p in personals}
+    institutional_map = {i["id"]: i for i in institutionals}
 
-        helpers.append({
-            "registration_id": str(i.registration),
-            "role": reg.role,
-            "capacity": reg.capacity,
-            "profile_kind": reg.profile_kind,
-            "profile": {
-                "registration": str(i.registration),
-                "name": i.name,
-                "city": i.city,
-                "address": i.address,
-                "phone": i.phone,
-                "avg_rating": i.avg_rating,
-                "rating_count": i.rating_count,
-            },
-        })
+    response = []
 
-    return helpers
+    for reg in registrations:
+        reg_id = reg["registration_id"]
+
+        if reg["capacity"] == "personal":
+            profile = personal_map.get(reg_id)
+            if not profile:
+                continue
+
+            response.append({
+                "registration_id": str(reg_id),
+                "role": "helper",
+                "capacity": "personal",
+                "profile_kind": "helper_personal",
+                "profile": {
+                    "registration": str(profile["registration"]),
+                    "name": profile["name"],
+                    "age": profile["age"],
+                    "faith": profile["faith"],
+                    "languages": profile["languages"],
+                    "city": profile["city"],
+                    "area": profile["area"],
+                    "phone": profile["phone"],
+                    "years_of_experience": profile["years_of_experience"],
+                    "avg_rating": profile["avg_rating"],
+                    "rating_count": profile["rating_count"],
+                },
+            })
+
+        elif reg["capacity"] == "institutional":
+            profile = institutional_map.get(reg_id)
+            if not profile:
+                continue
+
+            response.append({
+                "registration_id": str(reg_id),
+                "role": "helper",
+                "capacity": "institutional",
+                "profile_kind": "helper_institutional",
+                "profile": {
+                    "registration": str(reg_id),
+                    "name": profile["name"],
+                    "city": None,
+                    "address": None,
+                    "phone": None,
+                    "avg_rating": "0",
+                    "rating_count": 0,
+                },
+            })
+
+    return response
