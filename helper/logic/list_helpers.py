@@ -1,5 +1,6 @@
 from helper.tables.helpers import HelperPersonal, HelperInstitutional
 from registration.tables.registration import Registration
+
 from helper.structs.dtos import (
     HelperListOut,
     HelperListItemOut,
@@ -8,29 +9,26 @@ from helper.structs.dtos import (
 )
 
 
-async def list_helpers_service() -> HelperListOut:
-    # 1️⃣ Fetch all helper registrations
+async def list_helpers_service():
+    # Fetch all helper registrations
     registrations = await Registration.objects().where(
         Registration.role == "helper"
     )
 
-    items: list[HelperListItemOut] = []
+    items = []
 
-    # 2️⃣ Loop through registrations
     for reg in registrations:
-        profile_out = None
-
-        # 🔹 PERSONAL HELPERS
+        # PERSONAL HELPERS
         if reg.capacity == "personal":
             profile = await HelperPersonal.objects().where(
-                HelperPersonal.registration == reg.id   # ✅ CORRECT
+                HelperPersonal.registration == reg.id
             ).first()
 
             if not profile:
                 continue
 
             profile_out = HelperPersonalProfileOut(
-                id=profile.id,                          # ✅ Piccolo default PK
+                id=profile.id,
                 registration=str(reg.id),
                 name=profile.name,
                 age=profile.age,
@@ -44,10 +42,10 @@ async def list_helpers_service() -> HelperListOut:
                 rating_count=profile.rating_count,
             )
 
-        # 🔹 INSTITUTIONAL HELPERS
+        # INSTITUTIONAL HELPERS
         else:
             profile = await HelperInstitutional.objects().where(
-                HelperInstitutional.code == str(reg.id) # ✅ CORRECT
+                HelperInstitutional.code == str(reg.id)
             ).first()
 
             if not profile:
@@ -64,7 +62,6 @@ async def list_helpers_service() -> HelperListOut:
                 rating_count=0,
             )
 
-        # 3️⃣ Append final response item
         items.append(
             HelperListItemOut(
                 registration_id=str(reg.id),
@@ -75,5 +72,4 @@ async def list_helpers_service() -> HelperListOut:
             )
         )
 
-    # 4️⃣ Return API response
     return HelperListOut(items=items)
