@@ -7,3 +7,10 @@ class Registration(Table):
     role = Varchar()              # helper / user / both
     capacity = Varchar()          # personal / institutional
     profile_kind = Varchar()      # helper_personal / helper_institutional
+from piccolo.table import Table
+from piccolo.columns import Varchar
+
+
+class Registration(Table):
+    role = Varchar()
+    capacity = Varchar()
