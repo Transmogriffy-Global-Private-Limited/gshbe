@@ -1,8 +1,8 @@
 # db/piccolo_conf.py
 import os
+from dotenv import load_dotenv
 from piccolo.conf.apps import AppRegistry
 from piccolo.engine.postgres import PostgresEngine
-from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -16,5 +16,11 @@ DB = PostgresEngine(
     }
 )
 
-# Register your app(s)
-APP_REGISTRY = AppRegistry(apps=["db.piccolo_app"])
+APP_REGISTRY = AppRegistry(
+    apps=[
+        "admin.piccolo_app",
+        "auth.piccolo_app",
+        "profiles.piccolo_app",
+        "helper.piccolo_app",
+    ]
+)
