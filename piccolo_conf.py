@@ -1,4 +1,3 @@
-# db/piccolo_conf.py
 from piccolo.conf.apps import AppRegistry
 from piccolo.engine.postgres import PostgresEngine
 import os
@@ -15,9 +14,6 @@ DB = PostgresEngine(
 
 APP_REGISTRY = AppRegistry(
     apps=[
-        "auth.piccolo_app",
-        "profiles.piccolo_app",
-        "helper.piccolo_app",
         "admin.piccolo_app",
     ]
 )
