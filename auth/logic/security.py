@@ -1,12 +1,11 @@
 # app/auth/logic/security.py
-
 from datetime import datetime, timedelta
 from typing import Dict
 
 from jose import jwt
 from passlib.context import CryptContext
 
-SECRET_KEY = "CHANGE_ME_NOW"
+SECRET_KEY = "bd0c71b86d63ca6579656f7edc0670f9c8b2f0b309e859927b024607fbe63090358eaf0a4af5664f6e1de46ccd393ab916088a941a69d0320f6286f6fb3aca6e"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
